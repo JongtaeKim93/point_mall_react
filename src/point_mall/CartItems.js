@@ -31,16 +31,26 @@ class CartItems extends React.Component {
     }
 
     purchase = () => {
-        const itemsQueue = [];
+        const items = [];
         for(let cartItem of this.state.cartItems){
-            for(let i = 0; i<cartItem.count; i++){
-                itemsQueue.push(cartItem.item.id);                    
-            }
+            items.push({
+                item_id: cartItem.item.id,
+                count: cartItem.count
+            })
         }
-        this.setState({
-            purchaseItemsQueue: itemsQueue
+        axios.post('http://localhost:8002/items/purchase/',
+            {
+                items
+            },
+            {
+                headers: {
+                    'Authorization': localStorage.getItem('authorization')
+                }
+            }
+        ).then((response) => {
+            localStorage.removeItem('cart_items');
+            this.props.history.push('/me/items');
         });
-        this.purchaseNextItem(itemsQueue);
     }
 
     purchaseNextItem(itemsQueue){
