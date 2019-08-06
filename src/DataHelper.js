@@ -1,8 +1,8 @@
-import { decorate, observable, autorun } from 'mobx';
+import { observable, computed } from 'mobx';
 
 let instance;
 class DataHelper {
-    authToken = '';
+    @observable authToken = null;
 
     constructor(){
         if(instance) return instance;
@@ -15,7 +15,7 @@ class DataHelper {
 
     setAuthToken(token) {
         this.authToken = token.token_type + ' ' + token.access_token;
-        localStorage.setItem('auth_token', 'Bearer ' + token.access_token);
+        localStorage.setItem('auth_token', this.authToken);
     }
 
     getAuthToken(){
@@ -23,6 +23,16 @@ class DataHelper {
             this.authToken = localStorage.getItem('auth_token')
         }
         return this.authToken;
+    }
+
+    deleteToken(){
+        localStorage.removeItem('auth_token');
+        this.authToken = null;
+    }
+
+    @computed
+    get isLoggedIn(){
+        return this.authToken != null || localStorage.getItem('auth_token') != null;
     }
 
     static baseURL() {
@@ -40,15 +50,5 @@ class DataHelper {
         return dataHelper.getAuthToken();
     }
 }
-
-decorate(DataHelper, {
-    authToken: observable
-});
-
-const helper = new DataHelper();
-
-autorun(() => {
-    console.log(helper.authToken);
-});
 
 export default DataHelper;
