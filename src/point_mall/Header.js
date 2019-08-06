@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import DataHelper from '../DataHelper';
 
 
 class Header extends React.Component{
@@ -16,7 +17,7 @@ class Header extends React.Component{
     }
 
     indexCategories(){
-        axios.get('http://localhost:8002/categories/')
+        axios.get(DataHelper.baseURL() + '/categories/')
             .then((response) => {
                 const categories = response.data;
                 this.setState({
@@ -36,8 +37,8 @@ class Header extends React.Component{
             <Link to="/">이것은 김종태의 홈페이지</Link>
             {categories}
             <div className="header-right">
-                <Link to="/cart/items">Cart</Link>
-                <Link to="/me/items">My Items</Link>
+                <Link to="/cart/items">김종태's Cart</Link>
+                <Link to="/me/items">김종태's Items</Link>
                 <Link to="/login">Login</Link>
             </div>
         </header>

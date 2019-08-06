@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import ItemBox from './ItemBox';
 import { withRouter } from 'react-router-dom';
+import DataHelper from '../DataHelper';
 
 
 class CartItems extends React.Component {
@@ -38,42 +39,19 @@ class CartItems extends React.Component {
                 count: cartItem.count
             })
         }
-        axios.post('http://localhost:8002/items/purchase/',
+        axios.post(DataHelper.baseURL() + '/items/purchase/',
             {
                 items
             },
             {
                 headers: {
-                    'Authorization': localStorage.getItem('authorization')
+                    'Authorization': DataHelper.getAuthToken()
                 }
             }
         ).then((response) => {
             localStorage.removeItem('cart_items');
             this.props.history.push('/me/items');
         });
-    }
-
-    purchaseNextItem(itemsQueue){
-        console.log(itemsQueue);
-        if(itemsQueue.length < 1){
-            localStorage.setItem('cart_items', '[]');
-            this.props.history.push('/me/itmes');
-        }
-        else{
-            const itemId = itemsQueue.shift();
-            axios.post('http://localhost:8002/items/' + itemId + '/purchase/',
-            {},
-            {
-                headers: {
-                    'Authorization': localStorage.getItem('authorization')
-                }
-
-            }
-        ).then((response) => {
-            this.purchaseNextItem(itemsQueue);
-        });
-        }
-        
     }
 
     render() {
