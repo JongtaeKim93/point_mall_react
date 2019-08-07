@@ -1,9 +1,10 @@
 import { observable, action, computed } from 'mobx';
 
 export default class ItemStore {
-    @observable CartItems = [];
+    @observable cartItems = [];
 
-    constructor() {
+    constructor(rootStore) {
+        this.rootStore = rootStore;
         let cartItems = localStorage.getItem('cart_items');
         if (cartItems == null || cartItems.length < 1) {
             cartItems = [];

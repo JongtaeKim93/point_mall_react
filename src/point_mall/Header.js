@@ -5,7 +5,7 @@ import { observer } from 'mobx-react';
 import DataHelper from '../DataHelper';
 import { inject } from 'mobx-react';
 
-@inject('authStore')
+@inject('authStore', 'itemStore')
 @observer
 class Header extends React.Component{
     helper = new DataHelper();
@@ -37,7 +37,7 @@ class Header extends React.Component{
     }
 
     render(){
-        const { authStore } = this.props;
+        const { authStore, itemStore } = this.props;
         const categories = this.state.categories.map((category) => {
             return (
                 <Link key={category.id} to={'/categories/' + category.id}>{category.title}</Link>
@@ -48,7 +48,7 @@ class Header extends React.Component{
             <Link to="/">이것은 김종태의 홈페이지</Link>
             {categories}
             <div className="header-right">
-                <Link to="/cart/items">김종태's Cart</Link>
+                <Link to="/cart/items">김종태's Cart {itemStore.cartItemsCount}</Link>
                 {
                     authStore.isLoggedIn && <Link to="/me/items">김종태's Items</Link>
                 }
