@@ -2,7 +2,6 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import DataHelper from '../DataHelper';
 
-
 class ItemBox extends React.Component{
     goToItem = () => {
         const item = this.props.item;

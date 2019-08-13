@@ -3,7 +3,6 @@ import axios from 'axios';
 import ItemBox from './ItemBox';
 import DataHelper from '../DataHelper';
 
-
 class Home extends React.Component{
     constructor(props){
         super(props);

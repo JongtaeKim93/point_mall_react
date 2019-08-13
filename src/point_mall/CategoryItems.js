@@ -3,7 +3,6 @@ import axios from 'axios';
 import ItemBox from './ItemBox';
 import DataHelper from '../DataHelper';
 
-
 class CategoryItems extends React.Component {
     constructor(props) {
         super(props);
@@ -33,7 +32,6 @@ class CategoryItems extends React.Component {
             });
     }
 
-    
     render() {
         const items = this.state.items.map((item) => {
             return (

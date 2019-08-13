@@ -1,12 +1,10 @@
 import React from 'react';
 import axios from 'axios';
 import { withRouter } from 'react-router-dom';
-import { inject } from 'mobx-react';
 import DataHelper from '../DataHelper';
 
-@inject('authStore')
-class Login extends React.Component{
-    constructor(props){
+class Register extends React.Component{
+    constructor(props) {
         super(props);
         this.state = {
             username: '',
@@ -16,36 +14,32 @@ class Login extends React.Component{
 
     onInputChanged = (event) => {
         const target = event.target;
-        if(target.name === 'username'){
+        if (target.name === 'username') {
             this.setState({
                 username: target.value
             });
         }
-        else if(target.name === 'password'){
+        else if (target.name === 'password') {
             this.setState({
                 password: target.value
             });
         }
     }
 
-    login = () => {
+    register = () => {
         axios.post(
-            DataHelper.baseURL() + '/o/token/',
+            DataHelper.baseURL() + '/users/',
             {
-                grant_type: 'password',
-                client_id: 'gHuUXbfbsTaFdlfdHM0oQBodzCtab9bxcVq9qcFj',
                 username: this.state.username,
                 password: this.state.password
             }
         ).then((response) => {
-            const token = response.data;
-            const { authStore, history } = this.props;
-            authStore.setToken(token);
-            history.push('/');
+            const { history } = this.props;
+            history.push('/login');
         });
     }
 
-    render(){
+    render() {
         return (
             <div>
                 <div id="container">
@@ -57,11 +51,11 @@ class Login extends React.Component{
                         <label>비밀번호</label>
                         <input type="password" value={this.state.password} onChange={this.onInputChanged} name="password" />
                     </p>
-                    <button onClick={this.login}>로그인</button>
+                    <button onClick={this.register}>회원가입</button>
                 </div>
             </div>
         );
     }
 }
 
-export default withRouter(Login);
+export default withRouter(Register);
