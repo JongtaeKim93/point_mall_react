@@ -6,12 +6,40 @@ class HttpService{
         this.rootStore = rootStore;
         this.authStore = rootStore.authStore;
 
+        this.clientID = 'gHuUXbfbsTaFdlfdHM0oQBodzCtab9bxcVq9qcFj';
         axios.defaults.baseURL = 'http://localhost:8002';
         axios.defaults.headers.common['Authorization'] = this.authStore.authToken;
 
         reaction(() => this.authStore.authToken, () => {
             axios.defaults.headers.common['Authorization'] = this.authStore.authToken;
         });
+
+        axios.interceptors.response.use(response => {
+            return response;
+        }, originalError => {
+            const { config, response } = originalError;
+            const originalRequest = config;
+                if (response.status === 401) {
+                    if(this.authStore.refreshToken == null){
+                        alert('로그인이 필요한 서비스입니다.');
+                        this.rootStore.history.push('/login');  
+                    }
+                    else{
+                        return new Promise((resolve, reject) => {
+                            this.refreshToken().then(token => {
+                                    originalRequest.headers.Authorization = this.authStore.authToken;
+                                    resolve(axios(originalRequest));
+                            }).catch(error => {
+                                this.authStore.deleteToken();
+                                reject(originalError);
+                                alert('로그인이 필요한 서비스입니다.');
+                                this.rootStore.history.push('/login');  
+                            });
+                        });
+                    }
+                }
+                return Promise.reject(originalError);
+            });
     }
 
     getItem(itemId){
@@ -82,9 +110,22 @@ class HttpService{
         return axios.post('/o/token/',
             {
                 grant_type: 'password',
-                client_id: 'gHuUXbfbsTaFdlfdHM0oQBodzCtab9bxcVq9qcFj',
+                client_id: this.clientID,
                 username,
                 password
+            }).then(response => {
+                const token = response.data;
+                this.authStore.setToken(token)
+                return token;
+            });
+    }
+
+    refreshToken(username, password) {
+        return axios.post('/o/token/',
+            {
+                grant_type: 'refresh_token',
+                client_id: this.clientID,
+                refresh_token: this.authStore.refreshToken
             }).then(response => {
                 const token = response.data;
                 this.authStore.setToken(token)
