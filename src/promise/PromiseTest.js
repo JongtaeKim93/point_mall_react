@@ -2,42 +2,57 @@ import React from 'react';
 
 class PromiseTest extends React.Component{
 
-    callback(func){
-        for(let i=0; i<10; i++){
-            func(i);
+    constructor(props){
+        super(props);
+        this.count = 0;
+        this.resolves = [];
+        this.rejects = [];
+    }
+
+    createPromise = () => {
+        new Promise((resolve, reject) => {
+            new Promise((resolve1, reject1) => {
+                this.resolves.push(() => {
+                    resolve1();
+                });
+                this.rejects.push(() => {
+                    reject1();
+                });
+            }).then(value => {
+                console.log('then1: ' + this.count++);
+                resolve();
+            }).catch(error => {
+                console.log('error1: ' + this.count--);
+                reject();
+            });
+        }).then(value => {
+            console.log('then: ' + this.count++);
+        }).catch(error => {
+            console.log('error: ' + this.count--);
+        });
+    }
+
+    resolve = () => {
+        for(let resolve of this.resolves){
+            resolve();
         }
-    }
-    
-    callbackTest = () => {
-        const callbackfunc = function(i){
-            console.log('callback: ' + i);
-        };
-        this.callback(callbackfunc);
+        this.resolve = [];
     }
 
-    promiseTest = () => {
-        // const promise = new Promise((resolve, reject) => {
-        //     let a = 1;
-        //     const b = 2;
-        //     resolve(a + b);
-        //     a = 10;
-        //     console.log('after resolve');
-        // });
-        // promise.then((result => {
-        //     console.log('promise ' + result);
-        //     return result;
-        // }).catch(() => {
-        //     console.log('promise catch');
-        // })
-
+    reject = () => {
+        for(let reject of this.rejects){
+            reject();
+        }
+        this.resolve = [];
     }
 
     render(){
         return(
             <div>
                 <h1>Promise Test</h1>
-                <button onClick={this.callbackTest}>Callback</button>
-                <button onClick={this.promiseTest}>Promise</button>
+                <button onClick={this.createPromise}>Create Promise</button>
+                <button onClick={this.resolve}>Resolve</button>
+                <button onClick={this.reject}>Reject</button>
             </div>
         )
     }

@@ -45,6 +45,10 @@ class Header extends React.Component{
             <div className="header-right">
                 <Link to="/cart/items">김종태's Cart {itemStore.cartItemsCount}</Link>
                 {
+                    authStore.isLoggedIn &&
+                        <Link to="/me/histories">구매내역</Link>
+                }
+                {
                     authStore.isLoggedIn ?
                         <Link to="/me/items">김종태's Items</Link> :
                         <Link to="/register">Register</Link>

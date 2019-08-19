@@ -19,52 +19,106 @@ class HttpService{
         axios.interceptors.response.use(response => {
             return response;
         }, originalError => {
-            const { config, response } = originalError;
+            const{ config, response } = originalError;
             const originalRequest = config;
-                if (response.status === 401) {
-                    if(this.authStore.refreshToken == null){
-                        alert('로그인이 필요한 서비스입니다.');
-                        this.rootStore.history.push('/login');  
-                    }
-                    else{
-                        if(!this.isRefreshingToken){
-                            this.isRefreshingToken = true;
-                            return new Promise((resolve, reject) => {
-                                this.refreshToken().then(token => {
-                                        originalRequest.headers.Authorization = this.authStore.authToken;
-                                        resolve(axios(originalRequest));
-                                        for(let subscriber of this.refreshSubscribers){
-                                            subscriber(token);
-                                        }
-                                }).catch(error => {
-                                    this.authStore.deleteToken();
-                                    reject(originalError);
-                                    alert('로그인이 필요한 서비스입니다.');
-                                    this.rootStore.history.push('/login');
-                                    for(let subscriber of this.refreshSubscribers){
-                                        subscriber(null);
-                                    }
-                                }).finally(() => {
-                                    this.refreshSubscribers = [];
-                                    this.isRefreshingToken = false;
-                                });
-                            });
-                        }
+            if(response.status === 401){
+                if(this.authStore.refreshToken != null){ //401오류가 나고 토큰이 있을 때
+                    if(!this.isRefreshingToken){ //한 번에 여러 번 refresh하지 않기 위해서
+                        this.isRefreshingToken = true;
                         return new Promise((resolve, reject) => {
-                            this.refreshSubscribers.push(token => {
-                                if(token == null){
-                                    reject(originalError);
+                            this.refreshToken().then(token => {
+                                originalRequest.headers.Authorization = this.authStore.authToken;
+                                axios(originalRequest).then(response => {
+                                    resolve(response);
+                                }).catch(error => {
+                                    reject(error);
+                                });
+                                for (let subscriber of this.refreshSubscribers){
+                                    subscriber(token);
                                 }
-                                else{
-                                    originalRequest.headers.Authorization = this.authStore.authToken;
-                                    resolve(axios(originalRequest));
+                            }).catch(error => {
+                                reject(originalError);
+                                for (let subscriber of this.refreshSubscribers) {
+                                    subscriber(null);
                                 }
+                            }).finally(() => {
+                                this.isRefreshingToken = false;
+                                this.refreshSubscribers = [];
                             });
                         });
                     }
+
+                    return new Promise((resolve, reject) => {
+                        this.refreshSubscribers.push(token => {
+                            if(token == null) {
+                                reject(originalError);
+                            }
+                            else{
+                                originalRequest.headers.Authorization = this.authStore.authToken;
+                                axios(originalRequest).then(response => {
+                                    resolve(response);
+                                }).catch(error => {
+                                    reject(error);
+                                });
+                            }
+                        });
+                    });
                 }
-                return Promise.reject(originalError);
-            });
+            }
+            return Promise.reject(originalError);
+        });
+
+
+        //만료된 토큰을 다시 refresh하는 코드
+        // axios.interceptors.response.use(response => {
+        //     return response;
+        // }, originalError => {
+        //     const { config, response } = originalError;
+        //     const originalRequest = config;
+        //         if (response.status === 401) {
+        //             if(this.authStore.refreshToken == null){
+        //                 alert('로그인이 필요한 서비스입니다.');
+        //                 this.rootStore.history.push('/login');  
+        //             }
+        //             else{
+        //                 if(!this.isRefreshingToken){
+        //                     this.isRefreshingToken = true;
+        //                     return new Promise((resolve, reject) => {
+        //                         this.refreshToken().then(token => {
+        //                                 originalRequest.headers.Authorization = this.authStore.authToken;
+        //                                 resolve(axios(originalRequest));
+        //                                 for(let subscriber of this.refreshSubscribers){
+        //                                     subscriber(token);
+        //                                 }
+        //                         }).catch(error => {
+        //                             this.authStore.deleteToken();
+        //                             reject(originalError);
+        //                             alert('로그인이 필요한 서비스입니다.');
+        //                             this.rootStore.history.push('/login');
+        //                             for(let subscriber of this.refreshSubscribers){
+        //                                 subscriber(null);
+        //                             }
+        //                         }).finally(() => {
+        //                             this.refreshSubscribers = [];
+        //                             this.isRefreshingToken = false;
+        //                         });
+        //                     });
+        //                 }
+        //                 return new Promise((resolve, reject) => {
+        //                     this.refreshSubscribers.push(token => {
+        //                         if(token == null){
+        //                             reject(originalError);
+        //                         }
+        //                         else{
+        //                             originalRequest.headers.Authorization = this.authStore.authToken;
+        //                             resolve(axios(originalRequest));
+        //                         }
+        //                     });
+        //                 });
+        //             }
+        //         }
+        //         return Promise.reject(originalError);
+        //     });
     }
 
     getItem(itemId){
@@ -155,6 +209,20 @@ class HttpService{
                 const token = response.data;
                 this.authStore.setToken(token)
                 return token;
+            });
+    }
+
+    indexHistory(){
+        return axios.get('/histories/')
+            .then(response => {
+                return response.data;
+            });
+    }
+
+    refundHistory(historyId){
+        return axios.post('/histories/' + historyId + '/refund/')
+            .then(response => {
+                return response.data;
             });
     }
 }
