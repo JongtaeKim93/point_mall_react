@@ -148,6 +148,13 @@ class HttpService{
                 });
     }
 
+    indexTagItems(tag) {
+        return axios.get('/tags/' + tag + '/items/')
+            .then(response => {
+                return response.data;
+            });
+    }
+
     indexCategories(){
         return axios.get('/categories/')
             .then(response => {
