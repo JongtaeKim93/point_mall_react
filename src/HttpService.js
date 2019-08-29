@@ -9,7 +9,7 @@ class HttpService{
         this.clientID = 'SkF4vkzswSTbmKT4gsupiiTUbWVp0e7i4heuOnFA';
         this.refreshSubscribers = []; //요청목록
         this.isRefreshingToken = false;
-        axios.defaults.baseURL = 'http://api.pointmall.jongtaekim.com';
+        axios.defaults.baseURL = 'https://api.pointmall.jongtaekim.com';
         axios.defaults.headers.common['Authorization'] = this.authStore.authToken;
 
         reaction(() => this.authStore.authToken, () => {
