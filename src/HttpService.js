@@ -6,7 +6,7 @@ class HttpService{
         this.rootStore = rootStore;
         this.authStore = rootStore.authStore;
 
-        this.clientID = 'SkF4vkzswSTbmKT4gsupiiTUbWVp0e7i4heuOnFA';
+        this.clientID = '2ZD8KUHttSXIt6TevzHiq5QZukWZiPKecDXgknwo';
         this.refreshSubscribers = []; //요청목록
         this.isRefreshingToken = false;
         axios.defaults.baseURL = 'https://api.pointmall.jongtaekim.com';
